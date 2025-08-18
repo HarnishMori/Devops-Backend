@@ -12,38 +12,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config(); // Load environment variables first
 const express_1 = __importDefault(require("express"));
 const prisma_1 = __importDefault(require("./config/prisma"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
+const PORT = process.env.PORT || 5000;
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
-dotenv_1.default.config();
+// Add User
 app.post("/users/add", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password } = req.body;
-    const user = yield prisma_1.default.user.create({
-        data: {
-            username: username,
-            password: password,
-        },
-    });
-    res.json({
-        user,
-    });
+    try {
+        const { username, password } = req.body;
+        const user = yield prisma_1.default.user.create({
+            data: { username, password },
+        });
+        res.json(user);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to add user" });
+    }
 }));
-app.get("/users/get", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield prisma_1.default.user.findMany();
-    res.json(users);
+// Get Users
+app.get("/users/get", (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield prisma_1.default.user.findMany();
+        res.json(users);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch users" });
+    }
 }));
+// Delete User
 app.delete("/user/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    yield prisma_1.default.user.delete({
-        where: {
-            id: Number(id),
-        },
-    });
+    try {
+        const { id } = req.params;
+        yield prisma_1.default.user.delete({ where: { id: Number(id) } });
+        res.json({ message: "User deleted" });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete user" });
+    }
 }));
-app.listen(process.env.PORT || 5000, () => {
-    console.log(`server running on ${process.env.PORT}`);
+// Start Server
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
