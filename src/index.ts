@@ -11,6 +11,10 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, World!");
+})
+
 // Add User
 app.post("/users/add", async (req: Request, res: Response) => {
   try {
